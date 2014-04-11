@@ -84,8 +84,8 @@ int main(int argc, char** argv)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	// window dimensions
-	unsigned int width = 640;
-	unsigned int height = 480;
+	unsigned int width = 1024;
+	unsigned int height = 768;
 
 	// create window
 	SDL_Window* window = SDL_CreateWindow(
@@ -155,31 +155,27 @@ int main(int argc, char** argv)
 	// variable positions
 	GLint position_a = glGetAttribLocation(program, "position");
 	GLint tex_coord_a = glGetAttribLocation(program, "tex_coord");
-	GLint window_u = glGetUniformLocation(program, "window");
+	GLint perspective_u = glGetUniformLocation(program, "perspective");
 	GLint camera_u = glGetUniformLocation(program, "camera");
 	GLint time_u = glGetUniformLocation(program, "time");
 
-	GLint dude_u = glGetUniformLocation(program, "dude");
-	GLint right_u = glGetUniformLocation(program, "right");
-	GLint top_u = glGetUniformLocation(program, "top");
-	GLint left_u = glGetUniformLocation(program, "left");
-	GLint bottom_u = glGetUniformLocation(program, "bottom");
+	GLint sprite_u = glGetUniformLocation(program, "sprite");
 
 	// create vertex array and set active
-	GLuint vao;
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	GLuint dude_vao;
+	glGenVertexArrays(1, &dude_vao);
+	glBindVertexArray(dude_vao);
 
 	// create vertex buffer and set active
-	GLuint vbo;
-	glGenBuffers(1, &vbo);
+	GLuint dude_vbo;
+	glGenBuffers(1, &dude_vbo);
 
 	SDL_Surface* dude = load_surface("dude.png");
 
 	GLfloat w = dude->w;
 	GLfloat h = dude->h;
 
-	GLfloat vertices[] =
+	GLfloat dude_verts[] =
 	{
 		0.f, 0.f, 0.f, 1.f,
 		  w, 0.f, 1.f, 1.f,
@@ -188,25 +184,79 @@ int main(int argc, char** argv)
 	};
 
 	// load data
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, dude_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(dude_verts), dude_verts, GL_STATIC_DRAW);
 
 	// describe position attributes
 	glEnableVertexAttribArray(position_a);
 	glVertexAttribPointer(position_a, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
 
 	// describe texture coordinate attributes
-	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(tex_coord_a);
+	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
 
-	GLuint texture;
-	glGenTextures(1, &texture);
+	GLuint dude_texture;
+	glGenTextures(1, &dude_texture);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, dude_texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dude->w, dude->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, dude->pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glUniform1i(sprite_u, 0);
+
+	GLuint tower_vao;
+	glGenVertexArrays(1, &tower_vao);
+	glBindVertexArray(tower_vao);
+
+	GLuint tower_vbo;
+	glGenBuffers(1, &tower_vbo);
+
+	SDL_Surface* tower = load_surface("stone.png");
+
+	unsigned int rw = 10;
+	unsigned int rh = 7;
+
+	// triangle strip forming sides of a cube
+	GLfloat tower_verts[] = {
+		40.f, 40.f,  0.f, 0.f, rh * 1.f,
+		40.f, 40.f, 80.f, 0.f, 0.f,
+
+		40.f, -40.f,  0.f, rw * 1.f, rh * 1.f,
+		40.f, -40.f, 80.f, rw * 1.f, 0.f,
+
+		-40.f, -40.f,  0.f, rw * 2.f, rh * 1.f,
+		-40.f, -40.f, 80.f, rw * 2.f, 0.f,
+
+		-40.f, 40.f,  0.f, rw * 3.f, rh * 1.f,
+		-40.f, 40.f, 80.f, rw * 3.f, 0.f,
+
+		40.f, 40.f,  0.f, rw * 4.f, rh * 1.f,
+		40.f, 40.f, 80.f, rw * 4.f, 0.f
+	};
+
+	glBindBuffer(GL_ARRAY_BUFFER, tower_vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tower_verts), tower_verts, GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(position_a);
+	glVertexAttribPointer(position_a, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
+
+	glEnableVertexAttribArray(tex_coord_a);
+	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+	GLuint tower_texture;
+	glGenTextures(1, &tower_texture);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, tower_texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tower->w, tower->h, 0, GL_RGB, GL_UNSIGNED_BYTE, tower->pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glUniform1i(sprite_u, 1);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -215,14 +265,12 @@ int main(int argc, char** argv)
 	unsigned int now;
 	unsigned int frame_time;
 
-	// precompute scale to get pixel-perfect display
-	float scale = 4.f;
-	GLfloat window_scale[2] = {(2.f * scale) / width, (2.f * scale) / height};
-	glUniform2fv(window_u, 1, window_scale);
-
 	// camera position in pixels
-	GLfloat camera[2] = {22.f, 28.f};
-	glUniform2fv(camera_u, 1, camera);
+	GLfloat camera[3] = {0.f, 0.f, 120.f};
+	glUniform3fv(camera_u, 1, camera);
+
+	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, 1.f, 100.f);
+	glUniformMatrix4fv(perspective_u, 1, GL_FALSE, glm::value_ptr(perspective));
 
 	// main loop
 	SDL_Event event;
@@ -246,20 +294,21 @@ int main(int argc, char** argv)
 		// draw
 		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
 
 		SDL_GL_SwapWindow(window);
 	}
 
-	glDeleteTextures(1, &texture);
+	glDeleteTextures(1, &dude_texture);
+	glDeleteTextures(1, &tower_texture);
 
 	glDeleteProgram(program);
 	glDeleteShader(fragment_shader);
 	glDeleteShader(vertex_shader);
 
-	glDeleteBuffers(1, &vbo);
+	glDeleteBuffers(1, &dude_vbo);
 
-	glDeleteVertexArrays(1, &vao);
+	glDeleteVertexArrays(1, &dude_vao);
 
 	// clean up
 	SDL_GL_DeleteContext(context);

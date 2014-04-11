@@ -6,9 +6,9 @@ in vec2 WorldPos;
 out vec4 outColor;
 
 uniform uint time;
-uniform sampler2D dude;
+uniform sampler2D sprite;
 
 void main()
 {
-	outColor = texture(dude, TexCoord);
+	outColor = texture(sprite, TexCoord);
 }
