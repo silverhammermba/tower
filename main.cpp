@@ -172,15 +172,12 @@ int main(int argc, char** argv)
 
 	SDL_Surface* dude = load_surface("dude.png");
 
-	GLfloat w = dude->w;
-	GLfloat h = dude->h;
-
 	GLfloat dude_verts[] =
 	{
-		0.f, 0.f, 0.f, 1.f,
-		  w, 0.f, 1.f, 1.f,
-		  w,   h, 1.f, 0.f,
-		0.f,   h, 0.f, 0.f,
+		-10.f,  10.f, 0.f, 0.f, 0.f,
+		-10.f, -10.f, 0.f, 0.f, 1.f,
+		 10.f, -10.f, 0.f, 1.f, 1.f,
+		 10.f,  10.f, 0.f, 1.f, 0.f,
 	};
 
 	// load data
@@ -189,11 +186,11 @@ int main(int argc, char** argv)
 
 	// describe position attributes
 	glEnableVertexAttribArray(position_a);
-	glVertexAttribPointer(position_a, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(position_a, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
 
 	// describe texture coordinate attributes
 	glEnableVertexAttribArray(tex_coord_a);
-	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)(2 * sizeof(GLfloat)));
+	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
 	GLuint dude_texture;
 	glGenTextures(1, &dude_texture);
@@ -203,6 +200,8 @@ int main(int argc, char** argv)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dude->w, dude->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, dude->pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	GLfloat color[] = {0.f, 0.f, 0.f, 0.f};
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
 	glUniform1i(sprite_u, 0);
 
@@ -215,6 +214,7 @@ int main(int argc, char** argv)
 
 	SDL_Surface* tower = load_surface("stone.png");
 
+	// wrap count
 	unsigned int rw = 10;
 	unsigned int rh = 7;
 
@@ -269,7 +269,7 @@ int main(int argc, char** argv)
 	GLfloat camera[3] = {0.f, 0.f, 120.f};
 	glUniform3fv(camera_u, 1, camera);
 
-	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, 1.f, 100.f);
+	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, 1.f, 1000.f);
 	glUniformMatrix4fv(perspective_u, 1, GL_FALSE, glm::value_ptr(perspective));
 
 	// main loop
@@ -294,7 +294,14 @@ int main(int argc, char** argv)
 		// draw
 		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
+
+		glBindVertexArray(tower_vao);
+		glUniform1i(sprite_u, 1);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
+
+		glBindVertexArray(dude_vao);
+		glUniform1i(sprite_u, 0);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
 		SDL_GL_SwapWindow(window);
 	}
