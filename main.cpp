@@ -55,15 +55,8 @@ void load_shader(GLuint shader, const std::string& filename)
 		throw std::runtime_error("Failed to compile shader: " + filename);
 }
 
-SDL_Surface* load_surface(const std::string& filename)
-{
-	SDL_Surface* surface = IMG_Load(filename.c_str());
-	if (surface == nullptr)
-		throw std::runtime_error("IMG_Load failed: " + std::string(IMG_GetError()));
-	return surface;
-}
-
 #include "sprite.hpp"
+#include "texman.hpp"
 
 int main(int argc, char** argv)
 {
@@ -154,7 +147,9 @@ int main(int argc, char** argv)
 
 	glUseProgram(program);
 
-	Sprite dude(program, 28, 21, "dude.png", GL_RGBA);
+	TextureManager textures;
+
+	Sprite dude(program, 28, 21, textures["dude.png"]);
 
 	// variable positions
 	GLint position_a = glGetAttribLocation(program, "position");
@@ -163,16 +158,12 @@ int main(int argc, char** argv)
 	GLint camera_u = glGetUniformLocation(program, "camera");
 	GLint time_u = glGetUniformLocation(program, "time");
 
-	GLint sprite_u = glGetUniformLocation(program, "sprite");
-
 	GLuint tower_vao;
 	glGenVertexArrays(1, &tower_vao);
 	glBindVertexArray(tower_vao);
 
 	GLuint tower_vbo;
 	glGenBuffers(1, &tower_vbo);
-
-	SDL_Surface* tower = load_surface("stone.png");
 
 	// wrap count
 	unsigned int rw = 10;
@@ -205,16 +196,6 @@ int main(int argc, char** argv)
 	glEnableVertexAttribArray(tex_coord_a);
 	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
-	GLuint tower_texture;
-	glGenTextures(1, &tower_texture);
-
-	glBindTexture(GL_TEXTURE_2D, tower_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tower->w, tower->h, 0, GL_RGB, GL_UNSIGNED_BYTE, tower->pixels);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -228,6 +209,10 @@ int main(int argc, char** argv)
 
 	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, 1.f, 1000.f);
 	glUniformMatrix4fv(perspective_u, 1, GL_FALSE, glm::value_ptr(perspective));
+
+	// we only use one texture at a time
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(glGetUniformLocation(program, "sprite"), 0);
 
 	// main loop
 	SDL_Event event;
@@ -252,10 +237,7 @@ int main(int argc, char** argv)
 		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// TODO if we only need one at a time, there's no need for a uniform even!
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, tower_texture);
-		glUniform1i(sprite_u, 0);
+		glBindTexture(GL_TEXTURE_2D, textures["stone.png"]);
 
 		glBindVertexArray(tower_vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
@@ -265,7 +247,8 @@ int main(int argc, char** argv)
 		SDL_GL_SwapWindow(window);
 	}
 
-	glDeleteTextures(1, &tower_texture);
+	glDeleteBuffers(1, &tower_vbo);
+	glDeleteVertexArrays(1, &tower_vao);
 
 	glDeleteProgram(program);
 	glDeleteShader(fragment_shader);

@@ -3,26 +3,17 @@ class Sprite
 	GLuint vao;
 	GLuint vbo;
 	GLuint texture;
-	SDL_Surface* surface;
 
 	GLint sprite_u;
 
 	public:
 
-	Sprite(GLint program, float width, float height, const std::string& img_filename, GLenum format)
+	Sprite(GLint program, float width, float height, GLuint _texture)
 	{
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
-		glGenTextures(1, &texture);
 
-		surface = load_surface(img_filename);
-
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		GLfloat color[] = {0.f, 0.f, 0.f, 0.f};
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+		texture = _texture;
 
 		GLfloat verts[] = {
 			  0.f, height, 0.f, 0.f, 0.f,
@@ -43,26 +34,17 @@ class Sprite
 		GLint tex_coord_a = glGetAttribLocation(program, "tex_coord");
 		glEnableVertexAttribArray(tex_coord_a);
 		glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-
-		sprite_u = glGetUniformLocation(program, "sprite");
 	}
 
 	~Sprite()
 	{
-		SDL_FreeSurface(surface);
-
-		glDeleteTextures(1, &texture);
 		glDeleteBuffers(1, &vbo);
 		glDeleteVertexArrays(1, &vao);
 	}
 
 	void draw()
 	{
-		// bind texture to active unit
-		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniform1i(sprite_u, 0);
-
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
