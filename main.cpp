@@ -63,6 +63,8 @@ SDL_Surface* load_surface(const std::string& filename)
 	return surface;
 }
 
+#include "sprite.hpp"
+
 int main(int argc, char** argv)
 {
 	// INIT SYSTEMS
@@ -152,6 +154,8 @@ int main(int argc, char** argv)
 
 	glUseProgram(program);
 
+	Sprite dude(program, 28, 21, "dude.png", GL_RGBA);
+
 	// variable positions
 	GLint position_a = glGetAttribLocation(program, "position");
 	GLint tex_coord_a = glGetAttribLocation(program, "tex_coord");
@@ -160,50 +164,6 @@ int main(int argc, char** argv)
 	GLint time_u = glGetUniformLocation(program, "time");
 
 	GLint sprite_u = glGetUniformLocation(program, "sprite");
-
-	// create vertex array and set active
-	GLuint dude_vao;
-	glGenVertexArrays(1, &dude_vao);
-	glBindVertexArray(dude_vao);
-
-	// create vertex buffer and set active
-	GLuint dude_vbo;
-	glGenBuffers(1, &dude_vbo);
-
-	SDL_Surface* dude = load_surface("dude.png");
-
-	GLfloat dude_verts[] =
-	{
-		-10.f,  10.f, 0.f, 0.f, 0.f,
-		-10.f, -10.f, 0.f, 0.f, 1.f,
-		 10.f, -10.f, 0.f, 1.f, 1.f,
-		 10.f,  10.f, 0.f, 1.f, 0.f,
-	};
-
-	// load data
-	glBindBuffer(GL_ARRAY_BUFFER, dude_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(dude_verts), dude_verts, GL_STATIC_DRAW);
-
-	// describe position attributes
-	glEnableVertexAttribArray(position_a);
-	glVertexAttribPointer(position_a, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-
-	// describe texture coordinate attributes
-	glEnableVertexAttribArray(tex_coord_a);
-	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-
-	GLuint dude_texture;
-	glGenTextures(1, &dude_texture);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, dude_texture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dude->w, dude->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, dude->pixels);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	GLfloat color[] = {0.f, 0.f, 0.f, 0.f};
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-
-	glUniform1i(sprite_u, 0);
 
 	GLuint tower_vao;
 	glGenVertexArrays(1, &tower_vao);
@@ -248,15 +208,12 @@ int main(int argc, char** argv)
 	GLuint tower_texture;
 	glGenTextures(1, &tower_texture);
 
-	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, tower_texture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tower->w, tower->h, 0, GL_RGB, GL_UNSIGNED_BYTE, tower->pixels);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-	glUniform1i(sprite_u, 1);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -295,27 +252,24 @@ int main(int argc, char** argv)
 		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		// TODO if we only need one at a time, there's no need for a uniform even!
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, tower_texture);
+		glUniform1i(sprite_u, 0);
+
 		glBindVertexArray(tower_vao);
-		glUniform1i(sprite_u, 1);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
 
-		glBindVertexArray(dude_vao);
-		glUniform1i(sprite_u, 0);
-		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+		dude.draw();
 
 		SDL_GL_SwapWindow(window);
 	}
 
-	glDeleteTextures(1, &dude_texture);
 	glDeleteTextures(1, &tower_texture);
 
 	glDeleteProgram(program);
 	glDeleteShader(fragment_shader);
 	glDeleteShader(vertex_shader);
-
-	glDeleteBuffers(1, &dude_vbo);
-
-	glDeleteVertexArrays(1, &dude_vao);
 
 	// clean up
 	SDL_GL_DeleteContext(context);
@@ -329,4 +283,3 @@ int main(int argc, char** argv)
 
 	return 0;
 }
-
