@@ -4,8 +4,6 @@ class Sprite
 	GLuint vbo;
 	GLuint texture;
 
-	GLint sprite_u;
-
 	public:
 
 	Sprite(GLint program, float width, float height, GLuint _texture)

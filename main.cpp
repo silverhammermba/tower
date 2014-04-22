@@ -56,6 +56,7 @@ void load_shader(GLuint shader, const std::string& filename)
 }
 
 #include "sprite.hpp"
+#include "tower.hpp"
 #include "texman.hpp"
 
 int main(int argc, char** argv)
@@ -145,56 +146,15 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
+	glDeleteShader(fragment_shader);
+	glDeleteShader(vertex_shader);
+
 	glUseProgram(program);
 
 	TextureManager textures;
 
 	Sprite dude(program, 28, 21, textures["dude.png"]);
-
-	// variable positions
-	GLint position_a = glGetAttribLocation(program, "position");
-	GLint tex_coord_a = glGetAttribLocation(program, "tex_coord");
-	GLint perspective_u = glGetUniformLocation(program, "perspective");
-	GLint camera_u = glGetUniformLocation(program, "camera");
-	GLint time_u = glGetUniformLocation(program, "time");
-
-	GLuint tower_vao;
-	glGenVertexArrays(1, &tower_vao);
-	glBindVertexArray(tower_vao);
-
-	GLuint tower_vbo;
-	glGenBuffers(1, &tower_vbo);
-
-	// wrap count
-	unsigned int rw = 10;
-	unsigned int rh = 7;
-
-	// triangle strip forming sides of a cube
-	GLfloat tower_verts[] = {
-		40.f, 40.f,  0.f, 0.f, rh * 1.f,
-		40.f, 40.f, 80.f, 0.f, 0.f,
-
-		40.f, -40.f,  0.f, rw * 1.f, rh * 1.f,
-		40.f, -40.f, 80.f, rw * 1.f, 0.f,
-
-		-40.f, -40.f,  0.f, rw * 2.f, rh * 1.f,
-		-40.f, -40.f, 80.f, rw * 2.f, 0.f,
-
-		-40.f, 40.f,  0.f, rw * 3.f, rh * 1.f,
-		-40.f, 40.f, 80.f, rw * 3.f, 0.f,
-
-		40.f, 40.f,  0.f, rw * 4.f, rh * 1.f,
-		40.f, 40.f, 80.f, rw * 4.f, 0.f
-	};
-
-	glBindBuffer(GL_ARRAY_BUFFER, tower_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(tower_verts), tower_verts, GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(position_a);
-	glVertexAttribPointer(position_a, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-
-	glEnableVertexAttribArray(tex_coord_a);
-	glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+	Tower tower(program, 80, 80, textures["stone.png"]);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -202,6 +162,11 @@ int main(int argc, char** argv)
 	unsigned int last_time = SDL_GetTicks();
 	unsigned int now;
 	unsigned int frame_time;
+
+	// uniform locations
+	GLint perspective_u = glGetUniformLocation(program, "perspective");
+	GLint camera_u = glGetUniformLocation(program, "camera");
+	GLint time_u = glGetUniformLocation(program, "time");
 
 	// camera position in pixels
 	GLfloat camera[3] = {0.f, 0.f, 120.f};
@@ -237,22 +202,13 @@ int main(int argc, char** argv)
 		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBindTexture(GL_TEXTURE_2D, textures["stone.png"]);
-
-		glBindVertexArray(tower_vao);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
-
+		tower.draw();
 		dude.draw();
 
 		SDL_GL_SwapWindow(window);
 	}
 
-	glDeleteBuffers(1, &tower_vbo);
-	glDeleteVertexArrays(1, &tower_vao);
-
 	glDeleteProgram(program);
-	glDeleteShader(fragment_shader);
-	glDeleteShader(vertex_shader);
 
 	// clean up
 	SDL_GL_DeleteContext(context);
