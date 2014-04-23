@@ -55,6 +55,13 @@ void load_shader(GLuint shader, const std::string& filename)
 		throw std::runtime_error("Failed to compile shader: " + filename);
 }
 
+void check_gl()
+{
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+		throw std::runtime_error("OpenGL error: " + std::string((const char*)gluErrorString(error)));
+}
+
 #include "sprite.hpp"
 #include "tower.hpp"
 #include "texman.hpp"
