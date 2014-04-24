@@ -62,6 +62,7 @@ void check_gl()
 }
 
 #include "sprite.hpp"
+#include "dude.hpp"
 #include "tower.hpp"
 #include "texman.hpp"
 
@@ -159,7 +160,8 @@ int main(int argc, char** argv)
 
 	TextureManager textures;
 
-	Sprite dude(program, 28, 21, textures["dude.png"]);
+	Sprite dude_sprite(program, 28, 21, textures["dude.png"]);
+	Dude dude(dude_sprite);
 	Tower tower(program, 240, 220, textures["stone.png"]);
 
 	glEnable(GL_DEPTH_TEST);

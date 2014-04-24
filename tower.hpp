@@ -62,7 +62,7 @@ class Tower
 		glDeleteVertexArrays(1, &vao);
 	}
 
-	void draw(GLfloat depth)
+	void draw(GLfloat depth) const
 	{
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(vao);

@@ -44,9 +44,8 @@ class Sprite
 		glDeleteVertexArrays(1, &vao);
 	}
 
-	void draw()
+	void draw(const glm::mat4& model) const
 	{
-		glm::mat4 model;
 		glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
 
 		glBindTexture(GL_TEXTURE_2D, texture);
