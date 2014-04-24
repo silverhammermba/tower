@@ -258,11 +258,7 @@ int main(int argc, char** argv)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		dude.draw();
-
-		for (float d = 0.f; d < camera_pos.z; d += 40.f)
-		{
-			tower.draw(d);
-		}
+		tower.draw(camera_pos.z);
 
 		SDL_GL_SwapWindow(window);
 	}

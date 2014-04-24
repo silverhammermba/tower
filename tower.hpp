@@ -64,11 +64,15 @@ class Tower
 
 	void draw(GLfloat depth)
 	{
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, depth));
-		glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
-
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(vao);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
+
+		for (float d = 0.f; d < depth; d += 40.f)
+		{
+			glm::mat4 model = glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, d));
+			glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
+
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
+		}
 	}
 };
