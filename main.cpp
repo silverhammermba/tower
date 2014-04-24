@@ -9,8 +9,7 @@
 #include <SDL2/SDL_opengl.h>
 #include <glm/glm.hpp>
 #define GLM_FORCE_RADIANS
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
 
 using std::cerr;
 using std::endl;
@@ -178,8 +177,9 @@ int main(int argc, char** argv)
 	GLint time_u = glGetUniformLocation(program, "time");
 
 	// camera position in pixels
-	GLfloat camera[3] = {0.f, 0.f, 120.f};
-	glUniform3fv(camera_u, 1, camera);
+	glm::vec3 camera_pos(0.f, 0.f, 120.f);
+	glm::mat4 camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
 
 	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, 1.f, 1000.f);
 	glUniformMatrix4fv(perspective_u, 1, GL_FALSE, glm::value_ptr(perspective));
@@ -248,8 +248,9 @@ int main(int argc, char** argv)
 
 		if (cam_dir != 0)
 		{
-			camera[2] += (cam_dir * cam_speed * frame_time) / 1000.f;
-			glUniform3fv(camera_u, 1, camera);
+			camera_pos.z += (cam_dir * cam_speed * frame_time) / 1000.f;
+			camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+			glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
 		}
 
 		// draw
@@ -258,7 +259,10 @@ int main(int argc, char** argv)
 
 		dude.draw();
 
-		tower.draw();
+		for (float d = 0.f; d < camera_pos.z; d += 40.f)
+		{
+			tower.draw(d);
+		}
 
 		SDL_GL_SwapWindow(window);
 	}

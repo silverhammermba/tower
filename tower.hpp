@@ -4,6 +4,8 @@ class Tower
 	GLuint vbo;
 	GLuint texture;
 
+	GLint model_u;
+
 	public:
 
 	Tower(GLint program, float width, float height, GLuint _texture)
@@ -50,6 +52,8 @@ class Tower
 		GLint tex_coord_a = glGetAttribLocation(program, "tex_coord");
 		glEnableVertexAttribArray(tex_coord_a);
 		glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+		model_u = glGetUniformLocation(program, "model");
 	}
 
 	~Tower()
@@ -58,8 +62,11 @@ class Tower
 		glDeleteVertexArrays(1, &vao);
 	}
 
-	void draw()
+	void draw(GLfloat depth)
 	{
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, depth));
+		glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
+
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);

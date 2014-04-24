@@ -4,6 +4,8 @@ class Sprite
 	GLuint vbo;
 	GLuint texture;
 
+	GLint model_u;
+
 	public:
 
 	Sprite(GLint program, float width, float height, GLuint _texture)
@@ -32,6 +34,8 @@ class Sprite
 		GLint tex_coord_a = glGetAttribLocation(program, "tex_coord");
 		glEnableVertexAttribArray(tex_coord_a);
 		glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+
+		model_u = glGetUniformLocation(program, "model");
 	}
 
 	~Sprite()
@@ -42,6 +46,9 @@ class Sprite
 
 	void draw()
 	{
+		glm::mat4 model;
+		glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
+
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(vao);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
