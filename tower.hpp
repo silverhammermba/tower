@@ -13,28 +13,29 @@ class Tower
 
 		texture = _texture;
 
-		// number of times texture repeats
-		unsigned int rw = 2;
-		unsigned int rh = 1;
-
 		float depth = 40.f;
+
+		// number of times texture repeats
+		unsigned int rw = std::max((int)width / 40, 1);
+		unsigned int rh = std::max((int)height / 40, 1);
+		unsigned int rd = std::max((int)depth / 40, 1);
 
 		// triangle strip forming sides of a cube
 		GLfloat verts[] = {
-			 width / 2.f,  height / 2.f,   0.f,      0.f, rh * 1.f,
-			 width / 2.f,  height / 2.f, depth,      0.f,      0.f,
+			 width / 2.f,  height / 2.f,   0.f, (GLfloat)(rw * 0.f + rh * 0.f), rd * 1.f,
+			 width / 2.f,  height / 2.f, depth, (GLfloat)(rw * 0.f + rh * 0.f),      0.f,
 
-			 width / 2.f, -height / 2.f,   0.f, rw * 1.f, rh * 1.f,
-			 width / 2.f, -height / 2.f, depth, rw * 1.f,      0.f,
+			 width / 2.f, -height / 2.f,   0.f, (GLfloat)(rw * 1.f + rh * 0.f), rd * 1.f,
+			 width / 2.f, -height / 2.f, depth, (GLfloat)(rw * 1.f + rh * 0.f),      0.f,
 
-			-width / 2.f, -height / 2.f,   0.f, rw * 2.f, rh * 1.f,
-			-width / 2.f, -height / 2.f, depth, rw * 2.f,      0.f,
+			-width / 2.f, -height / 2.f,   0.f, (GLfloat)(rw * 1.f + rh * 1.f), rd * 1.f,
+			-width / 2.f, -height / 2.f, depth, (GLfloat)(rw * 1.f + rh * 1.f),      0.f,
 
-			-width / 2.f,  height / 2.f,   0.f, rw * 3.f, rh * 1.f,
-			-width / 2.f,  height / 2.f, depth, rw * 3.f,      0.f,
+			-width / 2.f,  height / 2.f,   0.f, (GLfloat)(rw * 2.f + rh * 1.f), rd * 1.f,
+			-width / 2.f,  height / 2.f, depth, (GLfloat)(rw * 2.f + rh * 1.f),      0.f,
 
-			 width / 2.f,  height / 2.f,   0.f, rw * 4.f, rh * 1.f,
-			 width / 2.f,  height / 2.f, depth, rw * 4.f,      0.f
+			 width / 2.f,  height / 2.f,   0.f, (GLfloat)(rw * 2.f + rh * 2.f), rd * 1.f,
+			 width / 2.f,  height / 2.f, depth, (GLfloat)(rw * 2.f + rh * 2.f),      0.f
 		};
 
 		glBindVertexArray(vao);

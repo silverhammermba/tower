@@ -161,7 +161,7 @@ int main(int argc, char** argv)
 	TextureManager textures;
 
 	Sprite dude(program, 28, 21, textures["dude.png"]);
-	Tower tower(program, 80, 80, textures["stone.png"]);
+	Tower tower(program, 240, 220, textures["stone.png"]);
 
 	glEnable(GL_DEPTH_TEST);
 	// only draw opaque pixels
@@ -188,6 +188,11 @@ int main(int argc, char** argv)
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(program, "sprite"), 0);
 
+	bool kup = false;
+	bool kdown = false;
+	int cam_dir = 0;
+	float cam_speed = 200.f;
+
 	// main loop
 	SDL_Event event;
 	bool running = true;
@@ -203,16 +208,57 @@ int main(int argc, char** argv)
 		// event handling
 		while (SDL_PollEvent(&event))
 		{
-			if (event.type == SDL_QUIT)
-				running = false;
+			switch(event.type)
+			{
+				case SDL_QUIT:
+					running = false;
+					break;
+				case SDL_KEYDOWN:
+					if (event.key.keysym.sym == SDLK_DOWN)
+					{
+						if (!kdown)
+						{
+							kdown = true;
+							cam_dir += 1;
+						}
+					}
+					else if (event.key.keysym.sym == SDLK_UP)
+					{
+						if (!kup)
+						{
+							kup = true;
+							cam_dir -= 1;
+						}
+					}
+					break;
+				case SDL_KEYUP:
+					if (event.key.keysym.sym == SDLK_DOWN)
+					{
+						cam_dir -= 1;
+						kdown = false;
+					}
+					else if (event.key.keysym.sym == SDLK_UP)
+					{
+						cam_dir += 1;
+						kup = false;
+					}
+					break;
+			}
+		}
+
+		if (cam_dir != 0)
+		{
+			camera[2] += (cam_dir * cam_speed * frame_time) / 1000.f;
+			glUniform3fv(camera_u, 1, camera);
 		}
 
 		// draw
 		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		tower.draw();
 		dude.draw();
+
+		tower.draw();
 
 		SDL_GL_SwapWindow(window);
 	}
