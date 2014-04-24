@@ -214,34 +214,19 @@ int main(int argc, char** argv)
 					running = false;
 					break;
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_DOWN)
-					{
-						if (!kdown)
-						{
-							kdown = true;
-							cam_dir += 1;
-						}
-					}
-					else if (event.key.keysym.sym == SDLK_UP)
-					{
-						if (!kup)
-						{
-							kup = true;
-							cam_dir -= 1;
-						}
-					}
-					break;
 				case SDL_KEYUP:
+					// ignore key repeat
+					if (event.key.repeat != 0) break;
+
+					int mult = 1;
+					// if letting go of the key, do the opposite
+					if (event.type == SDL_KEYUP) mult = -1;
+
 					if (event.key.keysym.sym == SDLK_DOWN)
-					{
-						cam_dir -= 1;
-						kdown = false;
-					}
+						cam_dir += mult;
 					else if (event.key.keysym.sym == SDLK_UP)
-					{
-						cam_dir += 1;
-						kup = false;
-					}
+						cam_dir += -mult;
+
 					break;
 			}
 		}
