@@ -9,13 +9,20 @@ class Dude
 
 	Dude(const Sprite& _sprite) : sprite(_sprite), pos(0.f, 0.f, 0.f)
 	{
-		// XXX hardcoded from main
+		// TODO hardcoded from main
 		width = 28;
 		height = 21;
 	}
 
+	void move(const glm::vec2& dir)
+	{
+		// TODO not frame-dependent
+		glm::vec2 nd = glm::normalize(dir);
+		pos += glm::vec3(nd, 0.f);
+	}
+
 	void draw()
 	{
-		sprite.draw(glm::translate(glm::mat4(1.f), pos));
+		sprite.draw(glm::translate(glm::mat4(1.f), pos - glm::vec3(width / 2.f, height / 2.f, 0.f)));
 	}
 };

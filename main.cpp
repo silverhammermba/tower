@@ -65,6 +65,7 @@ void check_gl()
 #include "dude.hpp"
 #include "tower.hpp"
 #include "texman.hpp"
+#include "control.hpp"
 
 int main(int argc, char** argv)
 {
@@ -192,8 +193,9 @@ int main(int argc, char** argv)
 
 	bool kup = false;
 	bool kdown = false;
-	int cam_dir = 0;
 	float cam_speed = 200.f;
+
+	KeyControls controls;
 
 	// main loop
 	SDL_Event event;
@@ -217,21 +219,32 @@ int main(int argc, char** argv)
 					break;
 				case SDL_KEYDOWN:
 				case SDL_KEYUP:
-					// ignore key repeat
-					if (event.key.repeat != 0) break;
-
-					int mult = 1;
-					// if letting go of the key, do the opposite
-					if (event.type == SDL_KEYUP) mult = -1;
-
-					if (event.key.keysym.sym == SDLK_DOWN)
-						cam_dir += mult;
-					else if (event.key.keysym.sym == SDLK_UP)
-						cam_dir += -mult;
-
+					controls.update(event);
 					break;
 			}
 		}
+
+		if (controls["quit"])
+			running = false;
+
+		glm::vec2 dir(0.f, 0.f);
+		if (controls["up"])
+			dir.y += 1;
+		if (controls["down"])
+			dir.y -= 1;
+		if (controls["right"])
+			dir.x += 1;
+		if (controls["left"])
+			dir.x -= 1;
+
+		if (dir != glm::vec2(0.f, 0.f))
+			dude.move(dir);
+
+		int cam_dir = 0;
+		if (controls["zoomout"])
+			cam_dir += 1;
+		if (controls["zoomin"])
+			cam_dir -= 1;
 
 		if (cam_dir != 0)
 		{
