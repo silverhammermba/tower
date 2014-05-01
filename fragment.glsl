@@ -12,5 +12,6 @@ uniform sampler2D sprite;
 
 void main()
 {
+	// TODO using alpha causes stuff to appear transparent, duh
 	outColor = texture(sprite, TexCoord) * vec4(vec3(1.0), 1.0 - (-CamSpace.z - zNear) / (zFar - zNear));
 }

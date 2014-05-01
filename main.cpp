@@ -14,6 +14,8 @@
 using std::cerr;
 using std::endl;
 
+const float gravity = 50.f;
+
 // read entire contents of file into string
 std::string read_file(const std::string& filename)
 {
@@ -167,6 +169,7 @@ int main(int argc, char** argv)
 
 	glEnable(GL_DEPTH_TEST);
 	// only draw opaque pixels
+	// TODO this is drawing the background color on top of stuff
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -197,6 +200,15 @@ int main(int argc, char** argv)
 	float cam_speed = 200.f;
 
 	KeyControls controls;
+	controls
+		.bind("quit", SDLK_ESCAPE, KeyControls::RELEASE)
+		.bind("up", SDLK_w, KeyControls::HOLD)
+		.bind("down", SDLK_s, KeyControls::HOLD)
+		.bind("left", SDLK_a, KeyControls::HOLD)
+		.bind("right", SDLK_d, KeyControls::HOLD)
+		.bind("jump", SDLK_SPACE, KeyControls::PRESS)
+		.bind("zoomout", SDLK_DOWN, KeyControls::HOLD)
+		.bind("zoomin", SDLK_UP, KeyControls::HOLD);
 
 	GLint time_u = glGetUniformLocation(program, "time");
 
@@ -240,8 +252,11 @@ int main(int argc, char** argv)
 		if (controls["left"])
 			dir.x -= 1;
 
-		if (dir != glm::vec2(0.f, 0.f))
-			dude.move(dir);
+		if (controls["jump"])
+			dude.jump();
+
+		dude.move(dir);
+		dude.step(frame_time);
 
 		int cam_dir = 0;
 		if (controls["zoomout"])

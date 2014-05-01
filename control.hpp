@@ -1,7 +1,9 @@
 class KeyControls
 {
+	public:
 	enum repeat_t {PRESS, RELEASE, REPEAT, HOLD};
 
+	private:
 	class Command
 	{
 		repeat_t repeat;
@@ -23,23 +25,17 @@ class KeyControls
 	std::unordered_map<SDL_Keycode, std::string> binds;
 	std::unordered_map<std::string, Command> commands;
 
-	void bind(const std::string& command, SDL_Keycode key, repeat_t repeat)
-	{
-		commands[command] = Command(repeat);
-		binds[key] = command;
-	}
-
 	public:
 
 	KeyControls()
 	{
-		bind("quit", SDLK_ESCAPE, RELEASE);
-		bind("up", SDLK_w, HOLD);
-		bind("down", SDLK_s, HOLD);
-		bind("left", SDLK_a, HOLD);
-		bind("right", SDLK_d, HOLD);
-		bind("zoomout", SDLK_DOWN, HOLD);
-		bind("zoomin", SDLK_UP, HOLD);
+	}
+
+	KeyControls& bind(const std::string& command, SDL_Keycode key, repeat_t repeat)
+	{
+		commands[command] = Command(repeat);
+		binds[key] = command;
+		return *this;
 	}
 
 	// update control state given (key) event
