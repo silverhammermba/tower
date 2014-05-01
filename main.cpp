@@ -174,28 +174,31 @@ int main(int argc, char** argv)
 	unsigned int now;
 	unsigned int frame_time;
 
-	// uniform locations
-	GLint perspective_u = glGetUniformLocation(program, "perspective");
-	GLint camera_u = glGetUniformLocation(program, "camera");
-	GLint time_u = glGetUniformLocation(program, "time");
-
-	// camera position in pixels
+	// set up camera
 	glm::vec3 camera_pos(0.f, 0.f, 120.f);
 	glm::mat4 camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+
+	GLint camera_u = glGetUniformLocation(program, "camera");
 	glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
 
-	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, 1.f, 1000.f);
-	glUniformMatrix4fv(perspective_u, 1, GL_FALSE, glm::value_ptr(perspective));
+	// set up perspective
+	float zNear = 1.f;
+	float zFar = 1000.f;
+	glUniform1f(glGetUniformLocation(program, "zNear"), zNear);
+	glUniform1f(glGetUniformLocation(program, "zFar"), zFar);
+
+	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, zNear, zFar);
+	glUniformMatrix4fv(glGetUniformLocation(program, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective));
 
 	// we only use one texture at a time
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(program, "sprite"), 0);
 
-	bool kup = false;
-	bool kdown = false;
 	float cam_speed = 200.f;
 
 	KeyControls controls;
+
+	GLint time_u = glGetUniformLocation(program, "time");
 
 	// main loop
 	SDL_Event event;
