@@ -167,6 +167,7 @@ int main(int argc, char** argv)
 	Dude dude(dude_sprite);
 	Tower tower(program, 240, 220, textures["stone.png"]);
 
+	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);
 	// only draw opaque pixels
 	// TODO this is drawing the background color on top of stuff
@@ -272,7 +273,6 @@ int main(int argc, char** argv)
 		}
 
 		// draw
-		glClearColor(0.2f, 0.2f, 0.2f, 1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		dude.draw();
