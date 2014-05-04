@@ -37,10 +37,10 @@ class Dude
 		vel.z = 8.f;
 	}
 
-	void step(unsigned int ms)
+	void step()
 	{
-		vel.z -= (gravity * ms / 1000.f);
-		pos += vel * (ms * speed / 1000.f);
+		vel.z -= (gravity * time_step) / 1000.f;
+		pos += vel * ((time_step * speed) / 1000.f);
 		if (pos.z < 0)
 			pos.z = 0;
 	}

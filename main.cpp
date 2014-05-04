@@ -15,6 +15,7 @@ using std::cerr;
 using std::endl;
 
 const float gravity = 50.f;
+const unsigned int time_step = 33;
 
 // read entire contents of file into string
 std::string read_file(const std::string& filename)
@@ -165,7 +166,7 @@ int main(int argc, char** argv)
 
 	Sprite dude_sprite(program, 28, 21, textures["dude.png"]);
 	Dude dude(dude_sprite);
-	Tower tower(program, 240, 220, textures["stone.png"]);
+	Tower tower(program, 240, 220, textures["wall.png"]);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);
@@ -220,7 +221,7 @@ int main(int argc, char** argv)
 	{
 		// update timers
 		now = SDL_GetTicks();
-		frame_time = now - last_time;
+		frame_time += now - last_time;
 		last_time = now;
 
 		glUniform1ui(time_u, now);
@@ -256,20 +257,25 @@ int main(int argc, char** argv)
 		if (controls["jump"])
 			dude.jump();
 
-		dude.move(dir);
-		dude.step(frame_time);
-
-		int cam_dir = 0;
-		if (controls["zoomout"])
-			cam_dir += 1;
-		if (controls["zoomin"])
-			cam_dir -= 1;
-
-		if (cam_dir != 0)
+		while (frame_time >= time_step)
 		{
-			camera_pos.z += (cam_dir * cam_speed * frame_time) / 1000.f;
-			camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
-			glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
+			dude.move(dir);
+			dude.step();
+
+			int cam_dir = 0;
+			if (controls["zoomout"])
+				cam_dir += 1;
+			if (controls["zoomin"])
+				cam_dir -= 1;
+
+			if (cam_dir != 0)
+			{
+				camera_pos.z += (cam_dir * cam_speed * time_step) / 1000.f;
+				camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+				glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
+			}
+
+			frame_time -= time_step;
 		}
 
 		// draw
