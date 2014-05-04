@@ -1,7 +1,9 @@
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
@@ -189,10 +191,15 @@ int main(int argc, char** argv)
 
 	Sprite dude_sprite(program, 28, 21, textures["dude.png"]);
 	Dude dude(dude_sprite);
+
 	float tower_width = 240.f;
 	float tower_height = 220.f;
+	float floor_depth = 200.f; // space between floors
 	Tower tower(program, tower_width, tower_height, textures["wall.png"]);
-	Floor floor(program, tower_width, tower_height, textures["tile.png"]);
+
+	Sprite floor_tile(program, tower_width / std::max((int)tower_width / 40, 1), tower_height / std::max((int)tower_height / 40, 1), textures["tile.png"]);
+	std::vector<Floor*> floors;
+	floors.push_back(new Floor(tower_width, tower_height, 0.f, floor_tile));
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);
@@ -284,6 +291,13 @@ int main(int argc, char** argv)
 			dude.move(dir);
 			dude.step();
 
+			// add additional floors if player is high enough
+			while (dude.get_depth() > floors.size() * floor_depth)
+			{
+				floors.push_back(new Floor(tower_width, tower_height, floors.size() * floor_depth, floor_tile));
+				cerr << "Floors: " << floors.size() << endl;
+			}
+
 			int cam_dir = 0;
 			if (controls["zoomout"])
 				cam_dir += 1;
@@ -305,7 +319,10 @@ int main(int argc, char** argv)
 
 		dude.draw();
 		tower.draw(camera_pos.z);
-		floor.draw();
+
+		for (auto& floor : floors)
+			if (floor->get_depth() <= camera_pos.z)
+				floor->draw();
 
 		SDL_GL_SwapWindow(window);
 	}

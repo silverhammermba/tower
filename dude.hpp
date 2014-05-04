@@ -17,6 +17,11 @@ class Dude
 		speed = 80.f;
 	}
 
+	float get_depth() const
+	{
+		return pos.z;
+	}
+
 	void move(const glm::vec2& dir)
 	{
 		if (dir != glm::vec2(0.f))
