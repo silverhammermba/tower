@@ -12,7 +12,7 @@ uniform sampler2D sprite;
 
 void main()
 {
-	outColor = texture(sprite, TexCoord);
+	outColor = texture(sprite, TexCoord) * vec4(vec3(1.0 - (-CamSpace.z - zNear) / (zFar - zNear)), 1.0);
 	// TODO perhaps optimize using step or something
 	if (outColor.a < 1.0)
 		gl_FragDepth = 1.0;

@@ -170,10 +170,6 @@ int main(int argc, char** argv)
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);
-	// only draw opaque pixels
-	// TODO this is drawing the background color on top of stuff
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	unsigned int last_time = SDL_GetTicks();
 	unsigned int now;
