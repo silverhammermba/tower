@@ -12,6 +12,10 @@ uniform sampler2D sprite;
 
 void main()
 {
-	// TODO using alpha causes stuff to appear transparent, duh
-	outColor = texture(sprite, TexCoord) * vec4(vec3(1.0 - (-CamSpace.z - zNear) / (zFar - zNear)), 1.0);
+	outColor = texture(sprite, TexCoord);
+	// TODO perhaps optimize using step or something
+	if (outColor.a < 1.0)
+		gl_FragDepth = 1.0;
+	else
+		gl_FragDepth = gl_FragCoord.z;
 }
