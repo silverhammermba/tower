@@ -47,6 +47,7 @@ class Dude
 
 	void draw()
 	{
-		sprite.draw(glm::translate(glm::mat4(1.f), pos - glm::vec3(width / 2.f, height / 2.f, 0.f)));
+		// center sprite, elevate slightly
+		sprite.draw(glm::translate(glm::mat4(1.f), pos + glm::vec3(width / -2.f, height / -2.f, 5.f)));
 	}
 };

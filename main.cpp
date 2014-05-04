@@ -17,6 +17,28 @@ using std::endl;
 const float gravity = 50.f;
 const unsigned int time_step = 33;
 
+GLuint bound_texture = 0;
+
+void bind_texture(GLuint texture)
+{
+	if (texture != bound_texture)
+	{
+		bound_texture = texture;
+		glBindTexture(GL_TEXTURE_2D, texture);
+	}
+}
+
+GLuint bound_vao = 0;
+
+void bind_vao(GLuint vao)
+{
+	if (vao != bound_vao)
+	{
+		bound_vao = vao;
+		glBindVertexArray(vao);
+	}
+}
+
 // read entire contents of file into string
 std::string read_file(const std::string& filename)
 {
@@ -67,6 +89,7 @@ void check_gl()
 #include "sprite.hpp"
 #include "dude.hpp"
 #include "tower.hpp"
+#include "floor.hpp"
 #include "texman.hpp"
 #include "control.hpp"
 
@@ -91,16 +114,16 @@ int main(int argc, char** argv)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
 	// window dimensions
-	unsigned int width = 1024;
-	unsigned int height = 768;
+	unsigned int win_width = 1024;
+	unsigned int win_height = 768;
 
 	// create window
 	SDL_Window* window = SDL_CreateWindow(
 		"TOWER SMASH",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
-		width,
-		height,
+		win_width,
+		win_height,
 		SDL_WINDOW_OPENGL
 	);
 	if (window == nullptr)
@@ -166,7 +189,10 @@ int main(int argc, char** argv)
 
 	Sprite dude_sprite(program, 28, 21, textures["dude.png"]);
 	Dude dude(dude_sprite);
-	Tower tower(program, 240, 220, textures["wall.png"], textures["tile.png"]);
+	float tower_width = 240.f;
+	float tower_height = 220.f;
+	Tower tower(program, tower_width, tower_height, textures["wall.png"]);
+	Floor floor(program, tower_width, tower_height, textures["tile.png"]);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);
@@ -188,7 +214,7 @@ int main(int argc, char** argv)
 	glUniform1f(glGetUniformLocation(program, "zNear"), zNear);
 	glUniform1f(glGetUniformLocation(program, "zFar"), zFar);
 
-	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)width, (float)height, zNear, zFar);
+	glm::mat4 perspective = glm::perspectiveFov(1.57f, (float)win_width, (float)win_height, zNear, zFar);
 	glUniformMatrix4fv(glGetUniformLocation(program, "perspective"), 1, GL_FALSE, glm::value_ptr(perspective));
 
 	// we only use one texture at a time
@@ -279,6 +305,7 @@ int main(int argc, char** argv)
 
 		dude.draw();
 		tower.draw(camera_pos.z);
+		floor.draw();
 
 		SDL_GL_SwapWindow(window);
 	}

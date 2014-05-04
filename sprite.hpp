@@ -48,8 +48,8 @@ class Sprite
 	{
 		glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
 
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glBindVertexArray(vao);
+		bind_texture(texture);
+		bind_vao(vao);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
 };

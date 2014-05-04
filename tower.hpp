@@ -6,22 +6,16 @@ class Tower
 
 	GLint model_u;
 
-	Sprite floor;
-	glm::mat4 floor_mat;
-
 	public:
 
-	Tower(GLint program, float width, float height, GLuint _wall_texture, GLuint _floor_texture)
-		: floor_mat(1.f), floor(program, width, height, _floor_texture, std::max((int)width / 40, 1), std::max((int)height / 40, 1))
+	Tower(GLint program, float width, float height, GLuint _wall_texture)
 	{
-		// set up initial floor position
-		floor_mat = glm::translate(floor_mat, glm::vec3(width / -2.f, height / -2.f, 0.f));
-
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
 
 		texture = _wall_texture;
 
+		// XXX 40 hard coded from texture size
 		float depth = 40.f;
 
 		// number of times texture repeats
@@ -71,8 +65,8 @@ class Tower
 
 	void draw(GLfloat depth) const
 	{
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glBindVertexArray(vao);
+		bind_texture(texture);
+		bind_vao(vao);
 
 		for (float d = 0.f; d < depth; d += 40.f)
 		{
@@ -81,8 +75,5 @@ class Tower
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
 		}
-
-		//floor_mat[2][3] = 0.f;
-		floor.draw(floor_mat);
 	}
 };
