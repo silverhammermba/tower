@@ -166,7 +166,7 @@ int main(int argc, char** argv)
 
 	Sprite dude_sprite(program, 28, 21, textures["dude.png"]);
 	Dude dude(dude_sprite);
-	Tower tower(program, 240, 220, textures["wall.png"]);
+	Tower tower(program, 240, 220, textures["wall.png"], textures["tile.png"]);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);

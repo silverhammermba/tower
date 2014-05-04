@@ -6,14 +6,21 @@ class Tower
 
 	GLint model_u;
 
+	Sprite floor;
+	glm::mat4 floor_mat;
+
 	public:
 
-	Tower(GLint program, float width, float height, GLuint _texture)
+	Tower(GLint program, float width, float height, GLuint _wall_texture, GLuint _floor_texture)
+		: floor_mat(1.f), floor(program, width, height, _floor_texture, std::max((int)width / 40, 1), std::max((int)height / 40, 1))
 	{
+		// set up initial floor position
+		floor_mat = glm::translate(floor_mat, glm::vec3(width / -2.f, height / -2.f, 0.f));
+
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
 
-		texture = _texture;
+		texture = _wall_texture;
 
 		float depth = 40.f;
 
@@ -74,5 +81,8 @@ class Tower
 
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 10);
 		}
+
+		//floor_mat[2][3] = 0.f;
+		floor.draw(floor_mat);
 	}
 };

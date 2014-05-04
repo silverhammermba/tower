@@ -8,7 +8,7 @@ class Sprite
 
 	public:
 
-	Sprite(GLint program, float width, float height, GLuint _texture)
+	Sprite(GLint program, float width, float height, GLuint _texture, unsigned int wrapw = 1, unsigned int wraph = 1)
 	{
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
@@ -16,10 +16,10 @@ class Sprite
 		texture = _texture;
 
 		GLfloat verts[] = {
-			  0.f, height, 0.f, 0.f, 0.f,
-			  0.f,    0.f, 0.f, 0.f, 1.f,
-			width,    0.f, 0.f, 1.f, 1.f,
-			width, height, 0.f, 1.f, 0.f
+			  0.f, height, 0.f,         0.f,         0.f,
+			  0.f,    0.f, 0.f,         0.f, 1.f * wraph,
+			width,    0.f, 0.f, 1.f * wrapw, 1.f * wraph,
+			width, height, 0.f, 1.f * wrapw,         0.f
 		};
 
 		glBindVertexArray(vao);
