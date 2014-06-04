@@ -17,7 +17,7 @@ using std::cerr;
 using std::endl;
 
 const float gravity = 50.f;
-const unsigned int time_step = 33;
+const unsigned int time_step = 16;
 
 GLuint bound_texture = 0;
 
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
 
 	TextureManager textures;
 
-	Sprite dude_sprite(program, 28, 21, textures["dude.png"]);
+	Sprite dude_sprite(program, 21, 28, textures["dude.png"]);
 	Dude dude(dude_sprite);
 
 	float tower_width = 240.f;
@@ -285,6 +285,24 @@ int main(int argc, char** argv)
 
 		if (controls["jump"])
 			dude.jump();
+
+		// get mouse position
+		int mousex;
+		int mousey;
+		SDL_GetMouseState(&mousex, &mousey);
+
+		// figure out dude's depth in screen space
+		glm::vec4 dp = glm::vec4(0.f, 0.f, dude.get_depth(), 1.f);
+		dp = perspective * camera * dp;
+
+		// convert mouse position to screen space (going through NDC)
+		dp.x = (2 * mousex - (int)win_width) * dp.w / (float)win_width;
+		dp.y = ((int)win_height - 2 * mousey) * dp.w / (float)win_height;
+
+		// undo transforms to get world space
+		dp = glm::inverse(camera) * glm::inverse(perspective) * dp;
+
+		dude.look_at(glm::vec3(dp));
 
 		while (frame_time >= time_step)
 		{

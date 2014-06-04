@@ -3,6 +3,7 @@ class Dude
 	const Sprite& sprite;
 	glm::vec3 pos;
 	glm::vec3 vel;
+	float look;
 	unsigned int width;
 	unsigned int height;
 	float speed;
@@ -11,15 +12,24 @@ class Dude
 
 	Dude(const Sprite& _sprite) : sprite(_sprite), pos(0.f), vel(0.f)
 	{
+		look = 0.f;
+
 		// TODO hardcoded from main
-		width = 28;
-		height = 21;
+		width = 21;
+		height = 28;
 		speed = 80.f;
 	}
 
 	float get_depth() const
 	{
 		return pos.z;
+	}
+
+	// XXX takes a vec3, but we only need the x, y
+	void look_at(const glm::vec3& spot)
+	{
+		glm::vec3 line = spot - pos;
+		look = atan2f(line.y, line.x);
 	}
 
 	void move(const glm::vec2& dir)
@@ -53,6 +63,11 @@ class Dude
 	void draw()
 	{
 		// center sprite, elevate slightly
-		sprite.draw(glm::translate(glm::mat4(1.f), pos + glm::vec3(width / -2.f, height / -2.f, 5.f)));
+		glm::mat4 model(1.f);
+		// XXX this seems like the reverse order to me, but it works...
+		model = glm::translate(model, pos);
+		model = model * glm::rotate(look, glm::vec3(0.f, 0.f, 1.f));
+		model = glm::translate(model, glm::vec3(width / -2.f, height / -2.f, 5.f));
+		sprite.draw(model);
 	}
 };
