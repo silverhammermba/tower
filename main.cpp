@@ -209,8 +209,9 @@ int main(int argc, char** argv)
 	unsigned int frame_time;
 
 	// set up camera
-	glm::vec3 camera_pos(0.f, 0.f, 120.f);
-	glm::mat4 camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+	float camera_z = 120.f;
+	float camera_v = 0.f;
+	glm::mat4 camera = glm::lookAt(glm::vec3(0.f, 0.f, camera_z), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
 	GLint camera_u = glGetUniformLocation(program, "camera");
 	glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
@@ -228,8 +229,6 @@ int main(int argc, char** argv)
 	glActiveTexture(GL_TEXTURE0);
 	glUniform1i(glGetUniformLocation(program, "sprite"), 0);
 
-	float cam_speed = 200.f;
-
 	KeyControls controls;
 	controls
 		.bind("quit", SDLK_ESCAPE, KeyControls::RELEASE)
@@ -238,8 +237,7 @@ int main(int argc, char** argv)
 		.bind("left", SDLK_a, KeyControls::HOLD)
 		.bind("right", SDLK_d, KeyControls::HOLD)
 		.bind("jump", SDLK_SPACE, KeyControls::PRESS)
-		.bind("zoomout", SDLK_DOWN, KeyControls::HOLD)
-		.bind("zoomin", SDLK_UP, KeyControls::HOLD);
+	;
 
 	GLint time_u = glGetUniformLocation(program, "time");
 
@@ -311,35 +309,25 @@ int main(int argc, char** argv)
 
 			// add additional floors if player is high enough
 			while (dude.get_depth() > floors.size() * floor_depth)
-			{
 				floors.push_back(new Floor(tower_width, tower_height, floors.size() * floor_depth, floor_tile));
-				cerr << "Floors: " << floors.size() << endl;
-			}
 
-			int cam_dir = 0;
-			if (controls["zoomout"])
-				cam_dir += 1;
-			if (controls["zoomin"])
-				cam_dir -= 1;
-
-			if (cam_dir != 0)
-			{
-				camera_pos.z += (cam_dir * cam_speed * time_step) / 1000.f;
-				camera = glm::lookAt(camera_pos, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
-				glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
-			}
-
+			float camera_v = (dude.get_depth() + 120.f - camera_z) * 5.f;
+			//camera_v += (acc * time_step) / 1000.f;
+			camera_z += (camera_v * time_step) / 1000.f;
 			frame_time -= time_step;
 		}
+
+		camera = glm::lookAt(glm::vec3(0.f, 0.f, camera_z), glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+		glUniformMatrix4fv(camera_u, 1, GL_FALSE, glm::value_ptr(camera));
 
 		// draw
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		dude.draw();
-		tower.draw(camera_pos.z);
+		tower.draw(camera_z);
 
 		for (auto& floor : floors)
-			if (floor->get_depth() <= camera_pos.z)
+			if (floor->get_depth() <= camera_z)
 				floor->draw();
 
 		SDL_GL_SwapWindow(window);
