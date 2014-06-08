@@ -13,6 +13,8 @@
 #define GLM_FORCE_RADIANS
 #include <glm/ext.hpp>
 
+#include <Box2D/Box2D.h>
+
 using std::cerr;
 using std::endl;
 
@@ -87,6 +89,8 @@ void check_gl()
 	if (error != GL_NO_ERROR)
 		throw std::runtime_error("OpenGL error: " + std::string((const char*)gluErrorString(error)));
 }
+
+b2World* world;
 
 #include "sprite.hpp"
 #include "dude.hpp"
@@ -188,6 +192,9 @@ int main(int argc, char** argv)
 	glUseProgram(program);
 
 	TextureManager textures;
+
+	// physics
+	world = new b2World(b2Vec2(0.f, 0.f));
 
 	Sprite dude_sprite(program, 21, 28, textures["dude.png"]);
 	Dude dude(dude_sprite);
@@ -304,7 +311,8 @@ int main(int argc, char** argv)
 
 		while (frame_time >= time_step)
 		{
-			dude.move(dir);
+			dude.set_vel(dir);
+			world->Step(time_step / 1000.f, 8, 3);
 			dude.step();
 
 			// add additional floors if player is high enough
@@ -332,6 +340,8 @@ int main(int argc, char** argv)
 
 		SDL_GL_SwapWindow(window);
 	}
+
+	delete world;
 
 	glDeleteProgram(program);
 

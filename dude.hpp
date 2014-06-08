@@ -8,6 +8,8 @@ class Dude
 	unsigned int height;
 	float speed;
 
+	b2Body* body;
+
 	public:
 
 	Dude(const Sprite& _sprite) : sprite(_sprite), pos(0.f), vel(0.f)
@@ -18,6 +20,22 @@ class Dude
 		width = 21;
 		height = 28;
 		speed = 80.f;
+
+		b2BodyDef body_def;
+		body_def.type = b2_dynamicBody;
+		body_def.position.Set(pos.x, pos.y);
+
+		body = world->CreateBody(&body_def);
+
+		b2FixtureDef fixture;
+		b2CircleShape circle;
+		circle.m_p.Set(0.f, 0.f);
+		circle.m_radius = 1.f;
+		fixture.shape = &circle;
+		fixture.density = 1.f;
+		fixture.friction = 0.f;
+
+		body->CreateFixture(&fixture);
 	}
 
 	float get_depth() const
@@ -32,19 +50,19 @@ class Dude
 		look = atan2f(line.y, line.x);
 	}
 
-	void move(const glm::vec2& dir)
+	void set_vel(const glm::vec2& dir)
 	{
 		if (dir != glm::vec2(0.f))
 		{
 			glm::vec2 nd = glm::normalize(dir);
-			vel.x = nd.x;
-			vel.y = nd.y;
+			body->SetLinearVelocity(b2Vec2(nd.x, nd.y));
 		}
 		else
 		{
-			vel.x = 0.f;
-			vel.y = 0.f;
+			body->SetLinearVelocity(b2Vec2(0.f, 0.f));
 		}
+
+		vel.z -= (gravity * time_step) / 1000.f;
 	}
 
 	void jump()
@@ -54,10 +72,15 @@ class Dude
 
 	void step()
 	{
-		vel.z -= (gravity * time_step) / 1000.f;
-		pos += vel * ((time_step * speed) / 1000.f);
+		pos.x = body->GetPosition().x;
+		pos.y = body->GetPosition().y;
+		pos.z += vel.z * ((time_step * speed) / 1000.f);
+
 		if (pos.z < 0)
+		{
 			pos.z = 0;
+			vel.z = 0;
+		}
 	}
 
 	void draw()
