@@ -19,7 +19,8 @@ class Dude
 		// TODO hardcoded from main
 		width = 21;
 		height = 28;
-		speed = 80.f;
+
+		speed = 4.f;
 
 		b2BodyDef body_def;
 		body_def.type = b2_dynamicBody;
@@ -27,10 +28,11 @@ class Dude
 
 		body = world->CreateBody(&body_def);
 
-		b2FixtureDef fixture;
 		b2CircleShape circle;
 		circle.m_p.Set(0.f, 0.f);
-		circle.m_radius = 1.f;
+		circle.m_radius = 0.3f;
+
+		b2FixtureDef fixture;
 		fixture.shape = &circle;
 		fixture.density = 1.f;
 		fixture.friction = 0.f;
@@ -54,7 +56,7 @@ class Dude
 	{
 		if (dir != glm::vec2(0.f))
 		{
-			glm::vec2 nd = glm::normalize(dir);
+			glm::vec2 nd = glm::normalize(dir) * speed;
 			body->SetLinearVelocity(b2Vec2(nd.x, nd.y));
 		}
 		else
@@ -72,9 +74,9 @@ class Dude
 
 	void step()
 	{
-		pos.x = body->GetPosition().x;
-		pos.y = body->GetPosition().y;
-		pos.z += vel.z * ((time_step * speed) / 1000.f);
+		pos.x = body->GetPosition().x * ppm;
+		pos.y = body->GetPosition().y * ppm;
+		pos.z += (vel.z * time_step * ppm) / 1000.f;
 
 		if (pos.z < 0)
 		{

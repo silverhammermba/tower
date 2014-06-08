@@ -6,6 +6,8 @@ class Tower
 
 	GLint model_u;
 
+	b2Body* body;
+
 	public:
 
 	Tower(GLint program, float width, float height, GLuint _wall_texture)
@@ -55,6 +57,28 @@ class Tower
 		glVertexAttribPointer(tex_coord_a, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
 
 		model_u = glGetUniformLocation(program, "model");
+
+		// physics
+		b2BodyDef body_def;
+		body_def.type = b2_staticBody;
+		body_def.position.Set(0.f, 0.f);
+
+		body = world->CreateBody(&body_def);
+
+		b2Vec2 shape[4];
+		shape[0].Set( width / (2.f * ppm),  height / (2.f * ppm));
+		shape[1].Set( width / (2.f * ppm), -height / (2.f * ppm));
+		shape[2].Set(-width / (2.f * ppm), -height / (2.f * ppm));
+		shape[3].Set(-width / (2.f * ppm),  height / (2.f * ppm));
+
+		b2ChainShape chain;
+		chain.CreateLoop(shape, 4);
+
+		b2FixtureDef fixture;
+		fixture.shape = &chain;
+		fixture.friction = 0.f;
+
+		body->CreateFixture(&fixture);
 	}
 
 	~Tower()

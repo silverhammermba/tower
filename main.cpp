@@ -18,8 +18,9 @@
 using std::cerr;
 using std::endl;
 
-const float gravity = 50.f;
+const float gravity = 9.8f;
 const unsigned int time_step = 16;
+const int ppm = 40; // pixels per meter
 
 GLuint bound_texture = 0;
 
