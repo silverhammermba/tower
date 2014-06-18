@@ -56,20 +56,22 @@ class Floor
 	// update the physics body when the tiles change
 	void update_body()
 	{
-		// TODO clear body fixtures
+		// clear existing fixtures
+		for (b2Fixture* fixture = body->GetFixtureList(); fixture; fixture->GetNext())
+			body->DestroyFixture(fixture);
 
 		// reset traversed state (we don't want to traverse set tiles)
 		for (int i = 0; i < width_c * height_c; ++i)
 			traversed[i] = tiles[i];
 
+		// traverse, creating new fixtures
 		for (int x = 0; x < width_c; ++x)
 			for (int y = 0; y < height_c; ++y)
 				if (!traversed[at(x, y)])
-				{
 					traverse(x, y);
-				}
 	}
 
+	// flood a region, creating fixtures as necessary
 	void traverse(int x, int y)
 	{
 		// location of corner in shape
@@ -77,7 +79,7 @@ class Floor
 		int cy = -1;
 		// flood shape, find corner
 		traverse_recurse(x, y, &cx, &cy);
-		// construct edge
+		// construct fixture
 		follow(cx, cy);
 	}
 
@@ -113,12 +115,16 @@ class Floor
 		return x < 0 || x >= width_c || y < 0 || y >= height_c;
 	}
 
+	// convert coords of a tile vertex to physics coords
+	inline b2Vec2 c2v(int x, int y) const
+	{
+		return b2Vec2((width / -2.f + x * (width / width_c)) / ppm, (height / -2.f + y * (height / height_c)) / ppm);
+	}
+
 	// starting at bottom left corner (cx, cy) construct a chain shape for the region and add it to the body
 	// TODO this doesn't work if a nonempty tile region is completetly detached from the walls so make such tiles collapse
 	void follow(int cx, int cy)
 	{
-		cerr << "Corner at (" << cx << "," << cy << ")\n";
-
 		// position
 		int x = cx;
 		int y = cy;
@@ -127,9 +133,7 @@ class Floor
 		int dy = 0;
 
 		std::vector<b2Vec2> shape;
-		shape.push_back(b2Vec2(width / -2.f + x * (width / width_c), height / -2.f + y * (height / height_c)));
-
-		int i = 0;
+		shape.push_back(c2v(x, y));
 
 		// we're done when we reach the starting corner going down
 		while (!(dy == -1 && x == cx && y == cy))
@@ -150,8 +154,7 @@ class Floor
 				dy = dx;
 				dx = -temp;
 
-				cerr << "(" << ex << "," << ey << ")\n";
-				shape.push_back(b2Vec2(width / -2.f + ex * (width / width_c), height / -2.f + ey * (height / height_c)));
+				shape.push_back(c2v(ex, ey));
 				// position stays the same
 			}
 			else if (is_wall(rx, ry) || tiles[at(rx, ry)])
@@ -162,28 +165,19 @@ class Floor
 			}
 			else
 			{
+				// next position
+				x += dx + dy;
+				y += dy - dx;
+
 				// turn right
-				// TODO something is going wrong here
 				int temp = dx;
 				dx = dy;
 				dy = -temp;
 
-				cerr << "(" << ex << "," << ey << ")\n";
-				shape.push_back(b2Vec2(width / -2.f + ex * (width / width_c), height / -2.f + ey * (height / height_c)));
-
-				x += dx + dy;
-				y += dy - dx;
-			}
-
-			if (++i > 50)
-			{
-				cerr << "Abort\n";
-				break;
+				shape.push_back(c2v(ex, ey));
 			}
 		}
-		cerr << "Done chain\n";
 
-		/*
 		b2ChainShape chain;
 		chain.CreateLoop(shape.data(), shape.size());
 
@@ -192,7 +186,6 @@ class Floor
 		fixture.friction = 0.f;
 
 		body->CreateFixture(&fixture);
-		*/
 	}
 
 	float get_depth() const
