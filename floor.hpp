@@ -48,6 +48,12 @@ class Floor
 		delete[] traversed;
 	}
 
+	// turn physics body on/off
+	void set_active(bool state)
+	{
+		body->SetActive(state);
+	}
+
 	inline int at(int x, int y) const
 	{
 		return y * width_c + x;

@@ -7,6 +7,7 @@ class Dude
 	unsigned int width;
 	unsigned int height;
 	float speed;
+	bool on_floor;
 
 	b2Body* body;
 
@@ -21,6 +22,8 @@ class Dude
 		height = 28;
 
 		speed = 4.f;
+
+		on_floor = true;
 
 		b2BodyDef body_def;
 		body_def.type = b2_dynamicBody;
@@ -67,22 +70,38 @@ class Dude
 		vel.z -= (gravity * time_step) / 1000.f;
 	}
 
-	void jump()
+	void jump(const std::vector<Floor*>& floors)
 	{
 		vel.z = 8.f;
+		on_floor = false;
+		floors[nearest_floor(pos.z)]->set_active(false);
 	}
 
-	void step()
+	// return nearest floor at or below the given z
+	inline int nearest_floor(float z) const
+	{
+		return (int)std::floor(z / floor_depth);
+	}
+
+	void step(const std::vector<Floor*>& floors)
 	{
 		pos.x = body->GetPosition().x * ppm;
 		pos.y = body->GetPosition().y * ppm;
-		pos.z += (vel.z * time_step * ppm) / 1000.f;
 
-		if (pos.z < 0)
+		float next_z = pos.z + (vel.z * time_step * ppm) / 1000.f;
+
+		int this_floor = nearest_floor(pos.z);
+
+		// if we're falling through a floor
+		if (this_floor > nearest_floor(next_z))
 		{
-			pos.z = 0;
+			// stop the fall
+			pos.z = this_floor * floor_depth;
 			vel.z = 0;
+			floors[this_floor]->set_active(true);
 		}
+		else // carry on
+			pos.z = next_z;
 	}
 
 	void draw()

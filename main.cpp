@@ -18,6 +18,7 @@
 using std::cerr;
 using std::endl;
 
+const float floor_depth = 200.f; // space between floors
 const float gravity = 9.8f;
 const unsigned int time_step = 16;
 const int ppm = 40; // pixels per meter
@@ -94,9 +95,9 @@ void check_gl()
 b2World* world;
 
 #include "sprite.hpp"
-#include "dude.hpp"
 #include "tower.hpp"
 #include "floor.hpp"
+#include "dude.hpp"
 #include "texman.hpp"
 #include "control.hpp"
 
@@ -202,7 +203,6 @@ int main(int argc, char** argv)
 
 	float tower_width = 240.f;
 	float tower_height = 220.f;
-	float floor_depth = 200.f; // space between floors
 	Tower tower(program, tower_width, tower_height, textures["wall.png"]);
 
 	Sprite floor_tile(program, tower_width / std::max((int)tower_width / 40, 1), tower_height / std::max((int)tower_height / 40, 1), textures["tile.png"]);
@@ -290,7 +290,7 @@ int main(int argc, char** argv)
 			dir.x -= 1;
 
 		if (controls["jump"])
-			dude.jump();
+			dude.jump(floors);
 
 		// get mouse position
 		int mousex;
@@ -314,7 +314,7 @@ int main(int argc, char** argv)
 		{
 			dude.set_vel(dir);
 			world->Step(time_step / 1000.f, 8, 3);
-			dude.step();
+			dude.step(floors);
 
 			// add additional floors if player is high enough
 			while (dude.get_depth() > floors.size() * floor_depth)
