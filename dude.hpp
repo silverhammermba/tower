@@ -41,6 +41,8 @@ class Dude
 		fixture.friction = 0.f;
 
 		body->CreateFixture(&fixture);
+
+		// TODO create smaller circle fixture for colliding with floor edges
 	}
 
 	float get_depth() const
@@ -72,7 +74,7 @@ class Dude
 
 	void jump(const std::vector<Floor*>& floors)
 	{
-		vel.z = 8.f;
+		vel.z = 10.f;
 		on_floor = false;
 		floors[nearest_floor(pos.z)]->set_active(false);
 	}
@@ -90,10 +92,14 @@ class Dude
 
 		float next_z = pos.z + (vel.z * time_step * ppm) / 1000.f;
 
+		// nearest floor
 		int this_floor = nearest_floor(pos.z);
+		// nearest tile
+		int tile_x = std::floor((pos.x + tower_width / 2.f) / (tower_width / tower_width_c));
+		int tile_y = std::floor((pos.y + tower_height / 2.f) / (tower_height / tower_height_c));
 
 		// if we're falling through a floor
-		if (this_floor > nearest_floor(next_z))
+		if (this_floor > nearest_floor(next_z) && floors[this_floor]->get_tile(tile_x, tile_y))
 		{
 			// stop the fall
 			pos.z = this_floor * floor_depth;

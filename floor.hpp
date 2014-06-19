@@ -1,13 +1,9 @@
 class Floor
 {
-	float width;
-	float height;
 	float depth;
-	unsigned int width_c;
-	unsigned int height_c;
 
-	bool* tiles;
-	bool* traversed;
+	bool tiles[tower_width_c * tower_height_c];
+	bool traversed[tower_width_c * tower_height_c];
 
 	b2Body* body;
 
@@ -15,22 +11,13 @@ class Floor
 
 	public:
 
-	Floor(float _width, float _height, float _depth, const Sprite& _sprite)
+	Floor(float _depth, const Sprite& _sprite)
 		: sprite(_sprite)
 	{
-		width = _width;
-		height = _height;
 		depth = _depth;
 
-		// XXX 40 hard coded from texture size
-		width_c = std::max((int)_width / 40, 1);
-		height_c = std::max((int)_height / 40, 1);
-
-		tiles = new bool[width_c * height_c];
-		traversed = new bool[width_c * height_c];
-
-		for (int i = 0; i < width_c * height_c; ++i)
-			tiles[i] = (std::rand() % 2 == 0);
+		for (int i = 0; i < tower_width_c * tower_height_c; ++i)
+			tiles[i] = depth == 0.f ? true : (std::rand() % 2 == 0);
 
 		// physics
 		b2BodyDef body_def;
@@ -38,14 +25,14 @@ class Floor
 		body_def.position.Set(0.f, 0.f);
 
 		body = world->CreateBody(&body_def);
+		body->SetActive(false); // floors are made active by the dude
 
 		update_body();
 	}
 
-	~Floor()
+	bool get_tile(int x, int y)
 	{
-		delete[] tiles;
-		delete[] traversed;
+		return tiles[at(x, y)];
 	}
 
 	// turn physics body on/off
@@ -56,7 +43,7 @@ class Floor
 
 	inline int at(int x, int y) const
 	{
-		return y * width_c + x;
+		return y * tower_width_c + x;
 	}
 
 	// update the physics body when the tiles change
@@ -67,12 +54,12 @@ class Floor
 			body->DestroyFixture(fixture);
 
 		// reset traversed state (we don't want to traverse set tiles)
-		for (int i = 0; i < width_c * height_c; ++i)
+		for (int i = 0; i < tower_width_c * tower_height_c; ++i)
 			traversed[i] = tiles[i];
 
 		// traverse, creating new fixtures
-		for (int x = 0; x < width_c; ++x)
-			for (int y = 0; y < height_c; ++y)
+		for (int x = 0; x < tower_width_c; ++x)
+			for (int y = 0; y < tower_height_c; ++y)
 				if (!traversed[at(x, y)])
 					traverse(x, y);
 	}
@@ -105,8 +92,8 @@ class Floor
 		// traverse neighbors
 		if (x > 0 && !traversed[at(x - 1, y    )]) traverse_recurse(x - 1, y,     cx, cy);
 		if (y > 0 && !traversed[at(x,     y - 1)]) traverse_recurse(x,     y - 1, cx, cy);
-		if (x + 1 <  width_c && !traversed[at(x + 1, y    )]) traverse_recurse(x + 1, y,     cx, cy);
-		if (y + 1 < height_c && !traversed[at(x,     y + 1)]) traverse_recurse(x,     y + 1, cx, cy);
+		if (x + 1 <  tower_width_c && !traversed[at(x + 1, y    )]) traverse_recurse(x + 1, y,     cx, cy);
+		if (y + 1 < tower_height_c && !traversed[at(x,     y + 1)]) traverse_recurse(x,     y + 1, cx, cy);
 	}
 
 	// check if (x, y) (which is assumed empty) is a bottom left corner of an empty region
@@ -118,13 +105,13 @@ class Floor
 	// check if (x, y) is outside grid
 	inline bool is_wall(int x, int y) const
 	{
-		return x < 0 || x >= width_c || y < 0 || y >= height_c;
+		return x < 0 || x >= tower_width_c || y < 0 || y >= tower_height_c;
 	}
 
 	// convert coords of a tile vertex to physics coords
 	inline b2Vec2 c2v(int x, int y) const
 	{
-		return b2Vec2((width / -2.f + x * (width / width_c)) / ppm, (height / -2.f + y * (height / height_c)) / ppm);
+		return b2Vec2((tower_width / -2.f + x * (tower_width / tower_width_c)) / ppm, (tower_height / -2.f + y * (tower_height / tower_height_c)) / ppm);
 	}
 
 	// starting at bottom left corner (cx, cy) construct a chain shape for the region and add it to the body
@@ -203,12 +190,12 @@ class Floor
 	{
 		glm::mat4 id(1.f);
 
-		for (int x = 0; x < width_c; ++x)
-			for (int y = 0; y < height_c; ++y)
+		for (int x = 0; x < tower_width_c; ++x)
+			for (int y = 0; y < tower_height_c; ++y)
 				if (tiles[at(x, y)])
 					sprite.draw(glm::translate(id, glm::vec3(
-						width / -2.f + x * (width / width_c),
-						height / -2.f + y * (height / height_c),
+						tower_width / -2.f + x * (tower_width / tower_width_c),
+						tower_height / -2.f + y * (tower_height / tower_height_c),
 						depth
 					)));
 	}

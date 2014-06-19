@@ -18,8 +18,17 @@
 using std::cerr;
 using std::endl;
 
-const float floor_depth = 200.f; // space between floors
-const float gravity = 9.8f;
+// yummy global constants
+// size of tower in pixels
+const float tower_width = 240.f;
+const float tower_height = 220.f;
+// space between floors in pixels
+const float floor_depth = 200.f;
+// size of floor in tiles
+const int tower_width_c = 6;
+const int tower_height_c = 5;
+// physics!
+const float gravity = 30.f;
 const unsigned int time_step = 16;
 const int ppm = 40; // pixels per meter
 
@@ -201,13 +210,11 @@ int main(int argc, char** argv)
 	Sprite dude_sprite(program, 21, 28, textures["dude.png"]);
 	Dude dude(dude_sprite);
 
-	float tower_width = 240.f;
-	float tower_height = 220.f;
 	Tower tower(program, tower_width, tower_height, textures["wall.png"]);
 
-	Sprite floor_tile(program, tower_width / std::max((int)tower_width / 40, 1), tower_height / std::max((int)tower_height / 40, 1), textures["tile.png"]);
+	Sprite floor_tile(program, tower_width / tower_width_c, tower_height / tower_height_c, textures["tile.png"]);
 	std::vector<Floor*> floors;
-	floors.push_back(new Floor(tower_width, tower_height, 0.f, floor_tile));
+	floors.push_back(new Floor(0.f, floor_tile));
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.f);
 	glEnable(GL_DEPTH_TEST);
@@ -318,7 +325,7 @@ int main(int argc, char** argv)
 
 			// add additional floors if player is high enough
 			while (dude.get_depth() > floors.size() * floor_depth)
-				floors.push_back(new Floor(tower_width, tower_height, floors.size() * floor_depth, floor_tile));
+				floors.push_back(new Floor(floors.size() * floor_depth, floor_tile));
 
 			float camera_v = (dude.get_depth() + 120.f - camera_z) * 5.f;
 			//camera_v += (acc * time_step) / 1000.f;
