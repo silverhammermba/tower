@@ -4,8 +4,6 @@ class Dude
 	glm::vec3 pos;
 	glm::vec3 vel;
 	float look;
-	unsigned int width;
-	unsigned int height;
 	float speed;
 	bool on_floor;
 
@@ -16,10 +14,6 @@ class Dude
 	Dude(const Sprite& _sprite) : sprite(_sprite), pos(0.f), vel(0.f)
 	{
 		look = 0.f;
-
-		// TODO hardcoded from main
-		width = 21;
-		height = 28;
 
 		speed = 4.f;
 
@@ -117,7 +111,7 @@ class Dude
 		// XXX this seems like the reverse order to me, but it works...
 		model = glm::translate(model, pos);
 		model = model * glm::rotate(look, glm::vec3(0.f, 0.f, 1.f));
-		model = glm::translate(model, glm::vec3(width / -2.f, height / -2.f, 5.f));
+		model = glm::translate(model, glm::vec3(sprite.width() / -2.f, sprite.height() / -2.f, 5.f));
 		sprite.draw(model);
 	}
 };

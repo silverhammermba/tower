@@ -32,17 +32,6 @@ const float gravity = 30.f;
 const unsigned int time_step = 16;
 const int ppm = 40; // pixels per meter
 
-GLuint bound_texture = 0;
-
-void bind_texture(GLuint texture)
-{
-	if (texture != bound_texture)
-	{
-		bound_texture = texture;
-		glBindTexture(GL_TEXTURE_2D, texture);
-	}
-}
-
 GLuint bound_vao = 0;
 
 void bind_vao(GLuint vao)
@@ -103,11 +92,12 @@ void check_gl()
 
 b2World* world;
 
+#include "texture.hpp"
+#include "texman.hpp"
 #include "sprite.hpp"
 #include "tower.hpp"
 #include "floor.hpp"
 #include "dude.hpp"
-#include "texman.hpp"
 #include "control.hpp"
 
 int main(int argc, char** argv)
@@ -207,12 +197,12 @@ int main(int argc, char** argv)
 	// physics
 	world = new b2World(b2Vec2(0.f, 0.f));
 
-	Sprite dude_sprite(program, 21, 28, textures["dude.png"]);
+	Sprite dude_sprite(program, textures["dude.png"]);
 	Dude dude(dude_sprite);
 
 	Tower tower(program, tower_width, tower_height, textures["wall.png"]);
 
-	Sprite floor_tile(program, tower_width / tower_width_c, tower_height / tower_height_c, textures["tile.png"]);
+	Sprite floor_tile(program, textures["tile.png"], tower_width / tower_width_c, tower_height / tower_height_c);
 	std::vector<Floor*> floors;
 	floors.push_back(new Floor(0.f, floor_tile));
 

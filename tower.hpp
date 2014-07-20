@@ -2,7 +2,7 @@ class Tower
 {
 	GLuint vao;
 	GLuint vbo;
-	GLuint texture;
+	const Texture& texture;
 
 	GLint model_u;
 
@@ -10,12 +10,11 @@ class Tower
 
 	public:
 
-	Tower(GLint program, float width, float height, GLuint _wall_texture)
+	Tower(GLint program, float width, float height, const Texture& _wall_texture)
+		: texture {_wall_texture}
 	{
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
-
-		texture = _wall_texture;
 
 		// XXX 40 hard coded from texture size
 		float depth = 40.f;
@@ -89,7 +88,7 @@ class Tower
 
 	void draw(GLfloat depth) const
 	{
-		bind_texture(texture);
+		texture.bind();
 		bind_vao(vao);
 
 		for (float d = 0.f; d < depth; d += 40.f)

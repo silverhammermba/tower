@@ -2,24 +2,32 @@ class Sprite
 {
 	GLuint vao;
 	GLuint vbo;
-	GLuint texture;
+
+	const Texture& texture;
+
+	float w;
+	float h;
 
 	GLint model_u;
 
 	public:
 
-	Sprite(GLint program, float width, float height, GLuint _texture, unsigned int wrapw = 1, unsigned int wraph = 1)
+	Sprite(GLint program, const Texture& _texture, float _width = -1.f, float _height = -1.f, unsigned int wrapw = 1, unsigned int wraph = 1)
+		: texture {_texture}, w {_width}, h {_height}
 	{
 		glGenVertexArrays(1, &vao);
 		glGenBuffers(1, &vbo);
 
-		texture = _texture;
+		if (w <= 0.f)
+			w = texture.width();
+		if (h <= 0.f)
+			h = texture.height();
 
 		GLfloat verts[] = {
-			  0.f, height, 0.f,         0.f,         0.f,
-			  0.f,    0.f, 0.f,         0.f, 1.f * wraph,
-			width,    0.f, 0.f, 1.f * wrapw, 1.f * wraph,
-			width, height, 0.f, 1.f * wrapw,         0.f
+			0.f,   h, 0.f,         0.f,         0.f,
+			0.f, 0.f, 0.f,         0.f, 1.f * wraph,
+			  w, 0.f, 0.f, 1.f * wrapw, 1.f * wraph,
+			  w,   h, 0.f, 1.f * wrapw,         0.f
 		};
 
 		glBindVertexArray(vao);
@@ -44,11 +52,21 @@ class Sprite
 		glDeleteVertexArrays(1, &vao);
 	}
 
+	inline float width() const
+	{
+		return w;
+	}
+
+	inline float height() const
+	{
+		return h;
+	}
+
 	void draw(const glm::mat4& model) const
 	{
 		glUniformMatrix4fv(model_u, 1, GL_FALSE, glm::value_ptr(model));
 
-		bind_texture(texture);
+		texture.bind();
 		bind_vao(vao);
 		glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 	}
