@@ -197,12 +197,12 @@ int main(int argc, char** argv)
 	// physics
 	world = new b2World(b2Vec2(0.f, 0.f));
 
-	Sprite dude_sprite(program, textures["dude.png"]);
+	Sprite dude_sprite(program, textures["img/dude.png"]);
 	Dude dude(dude_sprite);
 
-	Tower tower(program, tower_width, tower_height, textures["wall.png"]);
+	Tower tower(program, tower_width, tower_height, textures["img/wall.png"]);
 
-	Sprite floor_tile(program, textures["tile.png"], tower_width / tower_width_c, tower_height / tower_height_c);
+	Sprite floor_tile(program, textures["img/tile.png"], tower_width / tower_width_c, tower_height / tower_height_c);
 	std::vector<Floor*> floors;
 	floors.push_back(new Floor(0.f, floor_tile));
 
