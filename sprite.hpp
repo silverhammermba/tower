@@ -30,7 +30,7 @@ class Sprite
 			  w,   h, 0.f, 1.f * wrapw,         0.f
 		};
 
-		glBindVertexArray(vao);
+		bind_vao(vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);

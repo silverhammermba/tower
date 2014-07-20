@@ -42,7 +42,7 @@ class Tower
 			 width / 2.f,  height / 2.f, depth, (GLfloat)(rw * 2.f + rh * 2.f),      0.f
 		};
 
-		glBindVertexArray(vao);
+		bind_vao(vao);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
